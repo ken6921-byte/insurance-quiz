@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保險需求即時檢測</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background-color: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2, h3 { color: #2c3e50; text-align: center; margin-bottom: 20px; font-weight: 600; }
+        .progress-bar { height: 8px; background-color: #e0e0e0; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background-color: #3498db; width: 0%; transition: width 0.3s ease; }
+        .question-step { display: none; animation: fadeIn 0.4s; }
+        .question-step.active { display: block; }
+        label { display: block; margin-bottom: 12px; cursor: pointer; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; transition: all 0.2s; background: #fff; }
+        label:hover { border-color: #3498db; background-color: #f7fbff; transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        input[type="radio"], input[type="checkbox"] { margin-right: 12px; transform: scale(1.2); }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { border: none; padding: 0; margin-bottom: 8px; background: none; box-shadow: none; pointer-events: none; }
+        input[type="text"], input[type="tel"] { width: 100%; padding: 14px; border: 2px solid #bdc3c7; border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: border 0.3s; }
+        input[type="text"]:focus, input[type="tel"]:focus { border-color: #3498db; outline: none; }
+        .btn-group { display: flex; justify-content: space-between; margin-top: 25px; gap: 10px; }
+        button { padding: 14px 25px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-next { background-color: #3498db; color: white; width: 100%; }
+        .btn-next:hover { background-color: #2980b9; }
+        .btn-prev { background-color: #95a5a6; color: white; width: 30%; }
+        .result-box { text-align: center; display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <form id="quizForm">
+        <div class="question-step active" data-step="1">
+            <h3>1. 您目前是否已有保險？</h3>
+            <label><input type="radio" name="q1" value="沒有" onchange="checkSkip(this)"> 沒有</label>
+            <label><input type="radio" name="q1" value="有，但不清楚"> 有，但不清楚內容</label>
+            <label><input type="radio" name="q1" value="有，且了解"> 有，且大致了解</label>
+            <div class="btn-group"><button type="button" class="btn-next" onclick="nextStep(1)">下一題</button></div>
+        </div>
+
+        <div class="question-step" id="step2-container" data-step="2">
+            <h3>2. 已有的保障類型（可複選）</h3>
+            <label><input type="checkbox" name="q2" value="醫療實支"> 醫療實支</label>
+            <label><input type="checkbox" name="q2" value="住院日額"> 住院日額</label>
+            <label><input type="checkbox" name="q2" value="重大傷病"> 重大傷病</label>
+            <label><input type="checkbox" name="q2" value="癌症"> 癌症</label>
+            <label><input type="checkbox" name="q2" value="壽險"> 壽險</label>
+            <div class="btn-group">
+                <button type="button" class="btn-prev" onclick="prevStep(2)">上一步</button>
+                <button type="button" class="btn-next" onclick="nextStep(2)">下一題</button>
+            </div>
+        </div>
+
+        <div class="question-step" data-step="3">
+            <h3>3. 您是否知道目前醫療實支額度？</h3>
+            <label><input type="radio" name="q3" value="不知道"> 不知道</label>
+            <label><input type="radio" name="q3" value="10-20萬"> 10–20 萬</label>
+            <label><input type="radio" name="q3" value="30萬以上"> 30 萬以上</label>
+            <div class="btn-group">
+                <button type="button" class="btn-prev" onclick="prevStep(3)">上一步</button>
+                <button type="button" class="btn-next" onclick="nextStep(3)">下一題</button>
+            </div>
+        </div>
+
+        <div class="question-step" data-step="4">
+            <h3>4. 您上一次檢視保單是什麼時候？</h3>
+            <label><input type="radio" name="q4" value="1年內"> 1 年內</label>
+            <label><input type="radio" name="q4" value="3年以上"> 3 年以上</label>
+            <label><input type="radio" name="q4" value="從未檢視"> 從未檢視</label>
+            <div class="btn-group">
+                <button type="button" class="btn-prev" onclick="prevStep(4)">上一步</button>
+                <button type="button" class="btn-next" onclick="nextStep(4)">最後一步</button>
+            </div>
+        </div>
+
+        <div class="question-step" data-step="5">
+            <h3>領取您的分析報告</h3>
+            <p style="text-align:center; color:#666; font-size:14px; margin-bottom:20px;">請留下聯絡方式，系統將為您建立專屬建議檔。</p>
+            <div class="input-group">
+                <label>您的稱呼 (必填)</label>
+                <input type="text" id="custName" placeholder="例如：王小明">
+            </div>
+            <div class="input-group">
+                <label>手機號碼 (必填)</label>
+                <input type="tel" id="custPhone" placeholder="例如：0912345678">
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn-prev" onclick="prevStep(5)">上一步</button>
+                <button type="button" class="btn-next" onclick="submitData()">查看免費分析</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="result-box" id="resultPage">
+        <h2 style="color:#2ecc71;">分析完成！</h2>
+        <p id="resultText">資料分析中...</p>
+        <div style="margin-top: 30px; padding: 25px; background: #f8f9fa; border-radius: 12px;">
+            <p style="margin-bottom:20px; line-height:1.6;">感謝您的填寫。<br>您的專屬顧問將會在 24 小時內<br>提供您詳細的缺口分析報告。</p>
+            <button class="btn-next" style="width:100%; background-color:#00c300; font-weight:bold;" onclick="window.location.href='https://line.me/'">加入官方 LINE 諮詢</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // === 設定區 ===
+    // 請將您的 Google Script 網址貼在下面引號中。如果沒有，請保持現狀，程式會開啟「演示模式」。
+    const googleScriptUrl = '您的_GOOGLE_SCRIPT_網址_貼在這裡'; 
+    // =============
+
+    let currentStep = 1;
+    const totalSteps = 5;
+    let skipStep2 = false;
+
+    function updateProgress() {
+        const percent = ((currentStep - 1) / totalSteps) * 100;
+        document.getElementById('progress').style.width = percent + '%';
+    }
+
+    function checkSkip(radio) {
+        skipStep2 = (radio.value === '沒有');
+    }
+
+    function nextStep(step) {
+        document.querySelector(`.question-step[data-step="${step}"]`).classList.remove('active');
+        let next = step + 1;
+        if (skipStep2 && next === 2) next = 3;
+        currentStep = next;
+        const nextEl = document.querySelector(`.question-step[data-step="${next}"]`);
+        if(nextEl) { nextEl.classList.add('active'); updateProgress(); }
+    }
+
+    function prevStep(step) {
+        document.querySelector(`.question-step[data-step="${step}"]`).classList.remove('active');
+        let prev = step - 1;
+        if (skipStep2 && step === 3) prev = 1;
+        currentStep = prev;
+        document.querySelector(`.question-step[data-step="${prev}"]`).classList.add('active');
+        updateProgress();
+    }
+
+    function submitData() {
+        const name = document.getElementById('custName').value;
+        const phone = document.getElementById('custPhone').value;
+        if(name === "" || phone === "") { alert("請填寫稱呼與手機號碼才能查看結果喔！"); return; }
+
+        const btn = document.querySelector('button[onclick="submitData()"]');
+        btn.innerHTML = "資料傳送中...";
+        btn.disabled = true;
+
+        // Collect answers
+        const q1 = document.querySelector('input[name="q1"]:checked')?.value || "未填";
+        let q2List = [];
+        document.querySelectorAll('input[name="q2"]:checked').forEach(el => q2List.push(el.value));
+        const q2 = q2List.join(", ") || "無";
+        const q3 = document.querySelector('input[name="q3"]:checked')?.value || "未填";
+        const q4 = document.querySelector('input[name="q4"]:checked')?.value || "未填";
+
+        const dataToSend = { name, phone, q1, q2, q3, q4 };
+
+        // 判斷是否為演示模式
+        if (googleScriptUrl.includes('您的_GOOGLE_SCRIPT_網址') || googleScriptUrl === '') {
+            setTimeout(() => {
+                alert("【演示模式】\n因為尚未設定 Google 表單，資料不會真的送出。\n但流程是成功的！");
+                showResult(q4, name);
+            }, 1000);
+            return;
+        }
+
+        fetch(googleScriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dataToSend)
+        }).then(() => {
+            showResult(q4, name);
+        }).catch(err => {
+            alert("連線發生錯誤");
+            btn.innerHTML = "查看免費分析";
+            btn.disabled = false;
+        });
+    }
+
+    function showResult(q4, name) {
+        document.getElementById('quizForm').style.display = 'none';
+        document.querySelector('.progress-bar').style.display = 'none';
+        document.getElementById('resultPage').style.display = 'block';
+        const resultText = document.getElementById('resultText');
+        if(q4 === '3年以上' || q4 === '從未檢視') {
+            resultText.innerHTML = `親愛的 ${name}，<br>您已許久未檢視保單，<br>建議優先預約健診。`;
+        } else {
+            resultText.innerHTML = `親愛的 ${name}，<br>您的保險觀念很好，<br>請保持定期檢視的習慣。`;
+        }
+    }
+</script>
+
+</body>
+</html>
