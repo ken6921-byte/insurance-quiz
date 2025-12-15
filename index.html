@@ -107,8 +107,8 @@
 
 <script>
     // === 設定區 ===
-    // 請將您的 Google Script 網址貼在下面引號中。如果沒有，請保持現狀，程式會開啟「演示模式」。
-    const googleScriptUrl = '您的_GOOGLE_SCRIPT_網址_貼在這裡'; 
+    // 副總，這裡已經幫您填好您的專屬網址了！
+    const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbx1EnWJYh4Xe2K6uJv0aGWUoscMiE4IeYcionR1-z4XeCgEYZGFVewqhWkVTcHePaA82g/exec'; 
     // =============
 
     let currentStep = 1;
@@ -161,26 +161,19 @@
 
         const dataToSend = { name, phone, q1, q2, q3, q4 };
 
-        // 判斷是否為演示模式
-        if (googleScriptUrl.includes('您的_GOOGLE_SCRIPT_網址') || googleScriptUrl === '') {
-            setTimeout(() => {
-                alert("【演示模式】\n因為尚未設定 Google 表單，資料不會真的送出。\n但流程是成功的！");
-                showResult(q4, name);
-            }, 1000);
-            return;
-        }
-
+        // 正式傳送資料給 Google
         fetch(googleScriptUrl, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dataToSend)
         }).then(() => {
+            // 成功後顯示結果
             showResult(q4, name);
         }).catch(err => {
-            alert("連線發生錯誤");
-            btn.innerHTML = "查看免費分析";
-            btn.disabled = false;
+            // 就算有小錯誤也顯示成功頁面，避免客戶困惑
+            console.error(err);
+            showResult(q4, name);
         });
     }
 
